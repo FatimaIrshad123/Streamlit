@@ -3,8 +3,9 @@ import streamlit as st
 if "books" not in st.session_state:
     st.session_state.books = []
 
+
 def add_book():
-    st.subheader("📚 Add a New Book")
+    st.subheader("➕ Add a New Book")
     title = st.text_input("Enter Book Title:")
     author = st.text_input("Enter Author Name:")
     publication_year = st.number_input("Enter Publication Year:", min_value=1000, max_value=9999, step=1)
@@ -54,7 +55,6 @@ def display_books():
     else:
         st.info("No books available.")
 
-
 def display_statistics():
     st.subheader("📊 Book Statistics")
     total_books = len(st.session_state.books)
@@ -68,23 +68,24 @@ def display_statistics():
 
 st.sidebar.title("📚 Book Management System")
 menu = st.sidebar.radio("Choose an option:", 
-                        ["Add a Book", "Remove a Book", "Search for a Book", "Display All Books", "Display Statistics", "Exit"])
+                        ["➕ Add a Book", "🗑 Remove a Book", "🔍 Search for a Book", "📖 Display All Books", "📊 Display Statistics", "🚪 Exit"])
 
+st.title("📚 Personal Library Manager")
 # Display the selected menu option
-if menu == "Add a Book":
+if menu == "➕ Add a Book":
     add_book()
 
-elif menu == "Remove a Book":
+elif menu == "🗑 Remove a Book":
     remove_book()
 
-elif menu == "Search for a Book":
+elif menu == "🔍 Search for a Book":
     search_book()
 
-elif menu == "Display All Books":
+elif menu == "📖 Display All Books":
     display_books()
 
-elif menu == "Display Statistics":
+elif menu == "📊 Display Statistics":
     display_statistics()
 
-elif menu == "Exit":
+elif menu == "🚪 Exit":
     st.success("Thank you for using the Book Management System! 😊")
