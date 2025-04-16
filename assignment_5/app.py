@@ -2,12 +2,10 @@ import streamlit as st
 import hashlib
 from cryptography.fernet import Fernet
 
-key = Fernet.generate_key()
+key = b'VCJQDxVYatd_SlwYuACAsfFDFq3hm2TzZDXCt_B8s1I=' #Fernet.generate_key()
 cipher = Fernet(key)
 
-stored_data = {
-    "user1_data": {"encrypted_text": "some_ciphertext", "passkey": "hashed_passkey"},
-}
+stored_data = {}
 failed_attempts = 0
 
 def hash_passkey(passkey):
@@ -21,25 +19,24 @@ def encrypt(text, passkey):
 def decrypt(encypted_text, passkey):
     hashed_passkey = hash_passkey(passkey)
     global failed_attempts
-    print('hashed_passkey',hashed_passkey)
+    #print('hashed_passkey',hashed_passkey)
 
     for key, value in stored_data.items():
-        if (value["encrypted_text"] == encypted_text) and (value["passkey"] == hashed_passkey):
+        if value["encrypted_text"] == encypted_text and value["passkey"] == hashed_passkey:
             decrypted = cipher.decrypt(encypted_text.encode()).decode()
             failed_attempts = 0
             return decrypted
     failed_attempts += 1
-    print(f"Failed attempts: {failed_attempts}")
+    #print(f"Failed attempts: {failed_attempts}")
     return None
 
-print(decrypt('some_ciphertext', "hashed_passkey"))
 
-st.title("🏠 Welcome to the Secure Data Encryption System")
-
-menu = ["Home","Insert Data","Retrieve Data","Login"]
+menu = ["Home","Store Data","Retrieve Data","Login"]
 choice = st.sidebar.selectbox("Navigation", menu)
 
 if choice == "Home":
+    st.title("🏠 Welcome to the Secure Data Encryption System")
+
     st.markdown("### 🔐 Secure, Simple & Smart")
     st.markdown("""
     Welcome to your personal data vault!  
@@ -57,45 +54,56 @@ if choice == "Home":
 
     st.info("Use the sidebar to navigate through the app.")
 
-elif choice == "Insert Data":
-    st.subheader("Insert Data")
-    text = st.text_area("Enter text to encrypt:")
-    passkey = st.text_input("Enter passkey:", type="password")
+elif choice == "Store Data":
+    st.title("📂 Store Data Securely")
+    user_data = st.text_area("Enter Data:")
+    passkey = st.text_input("Enter Passkey:", type="password")
 
-    if st.button("Encrypt"):
-        if text and passkey:
-            encrypted_text = encrypt(text, passkey)
-            st.success(f"Encrypted Text: {encrypted_text}")
+    if st.button("Encrypt & Save"):
+        if user_data and passkey:
+            hashed_passkey = hash_passkey(passkey)
+            encrypted_text = encrypt(user_data, passkey)
+            stored_data[encrypted_text] = {"encrypted_text": encrypted_text, "passkey": hashed_passkey}
+            print('stored_data',stored_data)
+            st.success("✅ Data stored securely!")
         else:
-            st.error("Please enter both text and passkey.")
+            st.error("⚠️ Both fields are required!")
 
 elif choice == "Retrieve Data":
-    st.subheader("Retrieve Data")
-    encrypted_text = st.text_input("Enter encrypted text:")
+    st.title("🔍 Retrieve Data")
+    encrypted_text = st.text_input("Enter Encrypted text:")
     passkey = st.text_input("Enter passkey:", type="password")
 
     if st.button("Decrypt"):
         if encrypted_text and passkey:
             decrypted_text = decrypt(encrypted_text, passkey)
+            
             if decrypted_text:
-                st.success(f"Decrypted Text: {decrypted_text}")
+                st.success(f"✅ Decrypted Text: {decrypted_text}")
             else:
-                st.error("Decryption failed. Please check your inputs.")
+                st.error("❌ Decryption failed. Please check your inputs.")
+
+                if failed_attempts >= 3:
+                    st.warning("🔒 You have made too many failed attempts. Please try again later.")
         else:
-            st.error("Please enter both encrypted text and passkey.")
+            st.error("⚠️ Please enter both encrypted text and passkey.")
 
 elif choice == "Login":
-    st.subheader("Login")
-    username = st.text_input("Username:")
-    password = st.text_input("Password:", type="password")
+    st.title("🔑 Reauthorization Required")
+    
+    col1, col2 = st.columns(2)
+
+    with col1:
+        username = st.text_input("Enter Username:")
+
+    with col2:
+        login_pass = st.text_input("Enter Password:", type="password")
 
     if st.button("Login"):
-        if username == "admin" and password == "password":
-            st.success("Login successful!")
+        if login_pass == "admin123":  # Hardcoded for demo, replace with proper auth
+            st.success("✅ Reauthorized successfully! Redirecting to Retrieve Data...")
         else:
-            st.error("Invalid username or password.")
-            st.warning("You have made too many failed attempts. Please try again later.")
-
+            st.error("❌ Incorrect password!")
 
 st.markdown("---")
 st.markdown("Made with ❤️ by Fatima | 🔗 [GitHub](https://github.com/FatimaIrshad123)")
